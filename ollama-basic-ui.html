@@ -45,50 +45,107 @@
             background-color: #ef4444;
             box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
         }
-        .input-group {
-            margin-bottom: 20px;
+
+        /* Input Row Styles */
+        .input-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
         }
-        select, textarea, button {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
+        .prompt-container {
+            flex-grow: 1;
+            position: relative;
         }
         textarea {
-            min-height: 100px;
-            resize: vertical;
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            resize: none;
+            font-size: 16px;
+            line-height: 1.4;
+            min-height: 54px;
+            max-height: 200px;
+            box-sizing: border-box;
         }
-        button {
+        #generate {
+            width: 54px;
+            height: 54px;
+            border-radius: 27px;
             background: #007bff;
             color: white;
             border: none;
             cursor: pointer;
             font-weight: bold;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
         }
-        button:hover {
+        #generate:hover {
             background: #0056b3;
         }
-        button:disabled {
+        #generate:disabled {
             background: #cccccc;
-            cursor: not-allowed;
         }
+
+        /* Controls Row Styles */
+        .controls-row {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            padding: 10px 0;
+        }
+        .model-select-container {
+            flex: 1;
+        }
+        .temperature-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .slider-container {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        input[type="range"] {
+            flex-grow: 1;
+        }
+        .temperature-value {
+            min-width: 40px;
+            text-align: right;
+        }
+
+        /* Response Area */
         #response {
-            white-space: pre-wrap;
             margin-top: 20px;
             padding: 15px;
             background: #f8f9fa;
-            border-radius: 4px;
+            border-radius: 8px;
             border: 1px solid #ddd;
         }
         .status {
             color: #666;
-            font-style: italic;
+            font-size: 14px;
             margin-top: 10px;
         }
-        #modelList {
-            margin-bottom: 10px;
+
+        /* Send Icon */
+        .send-icon {
+            width: 24px;
+            height: 24px;
+            fill: white;
         }
     </style>
 </head>
@@ -101,20 +158,34 @@
                 <span id="serverStatusText">Checking server...</span>
             </div>
         </div>
-        
-        <div class="input-group">
-            <label for="modelList">Select Model:</label>
-            <select id="modelList">
-                <option value="loading">Loading models...</option>
-            </select>
+
+        <!-- Input Row -->
+        <div class="input-row">
+            <div class="prompt-container">
+                <textarea id="prompt" placeholder="Type your message here..." rows="1"></textarea>
+            </div>
+            <button id="generate" onclick="generateResponse()">
+                <svg class="send-icon" viewBox="0 0 24 24">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+            </button>
         </div>
 
-        <div class="input-group">
-            <label for="prompt">Enter your prompt:</label>
-            <textarea id="prompt" placeholder="Type your prompt here..."></textarea>
+        <!-- Controls Row -->
+        <div class="controls-row">
+            <div class="model-select-container">
+                <select id="modelList">
+                    <option value="loading">Loading models...</option>
+                </select>
+            </div>
+            <div class="temperature-container">
+                <label for="temperature">Temperature:</label>
+                <div class="slider-container">
+                    <input type="range" id="temperature" min="0" max="2" step="0.1" value="0.7">
+                    <span class="temperature-value" id="temperatureValue">0.7</span>
+                </div>
+            </div>
         </div>
-
-        <button id="generate" onclick="generateResponse()">Generate Response</button>
         
         <div id="status" class="status"></div>
         <div id="response"></div>
@@ -122,6 +193,20 @@
 
     <script>
         let serverOnline = false;
+
+        // Auto-resize textarea
+        const textarea = document.getElementById('prompt');
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+        });
+
+        // Temperature slider
+        const temperatureSlider = document.getElementById('temperature');
+        const temperatureValue = document.getElementById('temperatureValue');
+        temperatureSlider.addEventListener('input', function() {
+            temperatureValue.textContent = this.value;
+        });
 
         async function checkServerStatus() {
             const statusIndicator = document.getElementById('serverStatus');
@@ -148,7 +233,6 @@
             return false;
         }
 
-        // Fetch available models when page loads
         async function fetchModels() {
             const isOnline = await checkServerStatus();
             if (!isOnline) {
@@ -161,7 +245,7 @@
                 const response = await fetch('http://localhost:11434/api/tags');
                 const data = await response.json();
                 const modelSelect = document.getElementById('modelList');
-                modelSelect.innerHTML = ''; // Clear loading option
+                modelSelect.innerHTML = '';
                 
                 data.models.forEach(model => {
                     const option = document.createElement('option');
@@ -184,6 +268,7 @@
 
             const prompt = document.getElementById('prompt').value;
             const model = document.getElementById('modelList').value;
+            const temperature = parseFloat(document.getElementById('temperature').value);
             const button = document.getElementById('generate');
             const status = document.getElementById('status');
             const responseDiv = document.getElementById('response');
@@ -193,7 +278,6 @@
                 return;
             }
 
-            // Disable button and show status
             button.disabled = true;
             status.textContent = 'Generating response...';
             responseDiv.textContent = '';
@@ -206,7 +290,8 @@
                     },
                     body: JSON.stringify({
                         model: model,
-                        prompt: prompt
+                        prompt: prompt,
+                        temperature: temperature
                     })
                 });
 
@@ -221,10 +306,7 @@
                     const {value, done} = await reader.read();
                     if (done) break;
                     
-                    // Convert the Uint8Array to text
                     const chunk = new TextDecoder().decode(value);
-                    
-                    // Split by newlines in case we get multiple JSON objects
                     const lines = chunk.split('\n');
                     
                     for (const line of lines) {
@@ -233,7 +315,6 @@
                                 const jsonResponse = JSON.parse(line);
                                 if (jsonResponse.response) {
                                     fullResponse += jsonResponse.response;
-                                    // Convert markdown to HTML and update the response div
                                     responseDiv.innerHTML = marked.parse(fullResponse);
                                 }
                             } catch (e) {
@@ -252,10 +333,15 @@
             }
         }
 
-        // Check server status periodically
-        setInterval(checkServerStatus, 5000); // Check every 5 seconds
+        // Enter key to submit
+        textarea.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                generateResponse();
+            }
+        });
 
-        // Initialize the page
+        setInterval(checkServerStatus, 5000);
         fetchModels();
     </script>
 </body>
