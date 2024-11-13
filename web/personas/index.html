@@ -1,0 +1,154 @@
+<!-- web/0-basic/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ollama Web Interface</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="status-bar">
+            <h1>Ollama Web Interface</h1>
+            <div class="server-status">
+                <button id="settingsButton" class="icon-button" title="Manage Models">
+                    <svg class="settings-icon" viewBox="0 0 24 24">
+                        <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                    </svg>
+                </button>
+                <button id="darkModeToggle" class="theme-toggle">
+                    <svg class="theme-icon" viewBox="0 0 24 24">
+                        <path class="sun-icon" d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/>
+                        <path class="moon-icon" d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/>
+                    </svg>
+                </button>
+                <span class="status-indicator" id="serverStatus"></span>
+                <span id="serverStatusText">Checking server...</span>
+            </div>
+        </div>
+
+        <div id="response" class="response-area"></div>
+        
+        <div class="input-section">
+            <div class="controls-row">
+                <div class="model-select-container">
+                    <select id="modelList">
+                        <option value="loading">Loading models...</option>
+                    </select>
+                </div>
+                <div class="temperature-container">
+                    <label for="temperature">Temperature:</label>
+                    <div class="slider-container">
+                        <input type="range" id="temperature" min="0" max="2" step="0.1" value="0.7">
+                        <span class="temperature-value" id="temperatureValue">0.7</span>
+                    </div>
+                </div>
+                <div class="persona-select-container">
+                    <select id="personaList">
+                        <!-- Will be populated dynamically -->
+                    </select>
+                </div>
+            </div>
+
+            <div class="input-row">
+                <div class="prompt-container">
+                    <textarea id="prompt" placeholder="Type your message here..." rows="1"></textarea>
+                    <button id="imageUpload" class="image-upload-button" title="Upload Image">
+                        <svg class="image-icon" viewBox="0 0 24 24">
+                            <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                        </svg>
+                    </button>
+                    <div id="imagePreview" class="image-preview"></div>
+                </div>
+                <button id="generate" onclick="generateResponse()">
+                    <svg class="send-icon" viewBox="0 0 24 24">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="status" class="status"></div>
+        </div>
+    </div>
+
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="tab-container">
+                    <button class="tab-button active" data-tab="models">Models</button>
+                    <button class="tab-button" data-tab="personas">Personas</button>
+                </div>
+                <button class="close-button">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="tab-content active" id="models-tab">
+                    <div class="pull-section">
+                        <h3>Pull New Model</h3>
+                        <div class="pull-input">
+                            <input type="text" id="modelName" placeholder="Enter model name (e.g., llama2, mistral, codellama)">
+                            <button class="btn btn-primary" onclick="pullModel()" id="pullButton">
+                                Pull Model
+                            </button>
+                            <a href="https://ollama.com/library" target="_blank" class="btn btn-primary">
+                                Browse Library
+                            </a>
+                        </div>
+                        <div id="pullProgress" style="display: none;">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <div class="status-message" id="pullStatus"></div>
+                        </div>
+                    </div>
+
+                    <h3>Installed Models</h3>
+                    <div class="model-grid" id="modelGrid">
+                        <!-- Models will be populated here -->
+                    </div>
+                </div>
+                <div class="tab-content" id="personas-tab">
+                    <div class="persona-section">
+                        <button class="btn btn-primary" onclick="editPersona()">Add New Persona</button>
+                        <div class="persona-grid" id="personaGrid">
+                            <!-- Personas will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="editPersonaModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Persona</h2>
+                <button class="close-button" onclick="document.getElementById('editPersonaModal').style.display='none'">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="editPersonaName">Name:</label>
+                    <input type="text" id="editPersonaName" placeholder="Enter persona name">
+                </div>
+                <div class="form-group">
+                    <label for="editPersonaModel">Model:</label>
+                    <select id="editPersonaModel"></select>
+                </div>
+                <div class="form-group">
+                    <label for="editPersonaTemperature">Temperature:</label>
+                    <input type="range" id="editPersonaTemperature" min="0" max="2" step="0.1" value="0.7">
+                    <span id="editPersonaTemperatureValue">0.7</span>
+                </div>
+                <div class="form-group">
+                    <label for="editPersonaSystemPrompt">System Prompt:</label>
+                    <textarea id="editPersonaSystemPrompt" rows="4" placeholder="Enter system prompt"></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="savePersonaEdit()">Save Persona</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
