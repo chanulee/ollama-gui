@@ -14,7 +14,7 @@ No need for Docker, nodejs - just ollama, terminal and web browser.
 ## Directory
 ### 1. 0-basic
 0-basic is a proof of concept sketch/prototype for myself. Simple architecture for learning and testing.
-### 2. 1-chat
+### 2. ```1-chat```
 Main chat UI project folder. Features include:
 1) Basic prompting - model selection, temperature
 2) Model manager - pull new model, view and delete models
