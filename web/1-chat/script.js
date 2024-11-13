@@ -170,4 +170,21 @@ textarea.addEventListener('keydown', function(e) {
 });
 
 setInterval(checkServerStatus, 5000);
-fetchModels(); 
+fetchModels();
+
+// Add this near the top of the file
+function initTheme() {
+    const theme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+}
+
+// Add this to your existing initialization code
+document.getElementById('darkModeToggle').addEventListener('click', toggleTheme);
+initTheme(); 
