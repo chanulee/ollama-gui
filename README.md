@@ -12,15 +12,22 @@ No need for Docker, nodejs - just ollama, terminal and web browser.
 - [For future reference](#for-future-reference)
 
 ## Directory
-### 1. 0-basic
-0-basic is a proof of concept sketch/prototype for myself. Simple architecture for learning and testing.
-### 2. ```1-chat```
+higher the number, more experimental (with higer capability) it gets
+### 1. basic-poc
+basic-poc is a proof of concept sketch/prototype of on-board ai.
+### 2. chat
 Main chat UI project folder. Features include:
 1) Basic prompting - model selection, temperature
 2) Model manager - pull new model, view and delete models
 3) Image input for [llama3.2-vision:latest](https://ollama.com/library/llama3.2-vision)
 4) Server status
 5) Dark mode
+### 3. personas
+Flagship interface 
+1) User defined personas
+2) image upload for llama3.2-vision
+
+---
 
 ## Beginner's guide
 1. Ollama setup - install ollama app for mac (You can download model or just proceed and use gui)
@@ -50,8 +57,6 @@ While ollama server running, this is API command. Get rid of the stream: false i
 ```bash
 http://localhost:11434/api/generate -d '{ "model": "mistral-nemo", "prompt": "What is water made of?", "stream": false }'
 ```
-
-## Model instructions
 
 ## For future reference
 - Making a custom model using huggingface model https://www.youtube.com/watch?v=bXf2Cxf3Wk0
