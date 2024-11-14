@@ -9,6 +9,11 @@ let personas = JSON.parse(localStorage.getItem('personas')) || [
     }
 ];
 
+// Context management variables
+let useFullContext = false;
+let selectedContextMessages = [];
+let conversationHistory = [];
+
 // Auto-resize textarea
 const textarea = document.getElementById('prompt');
 textarea.addEventListener('input', function() {
@@ -93,14 +98,15 @@ async function fetchModels() {
         // Update persona selector
         const personaList = document.getElementById('personaList');
         if (personaList) {
+            const defaultPersonas = data.models.map(createDefaultPersonaFromModel);
             personaList.innerHTML = `
                 <optgroup label="Models">
-                    ${data.models.map(model => 
-                        `<option value="${model.name}" data-is-default="true">${model.name}</option>`
+                    ${defaultPersonas.map(p => 
+                        `<option value="${p.name}" data-is-default="true">${p.name}</option>`
                     ).join('')}
                 </optgroup>
                 <optgroup label="Personas">
-                    ${personas.map(p => 
+                    ${personas.filter(p => !p.isDefault).map(p => 
                         `<option value="${p.name}">${p.name}</option>`
                     ).join('')}
                 </optgroup>
@@ -169,6 +175,30 @@ async function generateResponse() {
     userMessage.textContent = prompt;
     responseDiv.appendChild(userMessage);
 
+    // Create contextPrompt before adding the latest user message
+    let contextMessages = [];
+
+    if (useFullContext) {
+        contextMessages = [...conversationHistory];
+    } else if (selectedContextMessages.length > 0) {
+        selectedContextMessages.forEach(index => {
+            const userMsg = conversationHistory[index * 2];
+            const assistantMsg = conversationHistory[index * 2 + 1];
+            if (userMsg && assistantMsg) {
+                contextMessages.push(userMsg);
+                contextMessages.push(assistantMsg);
+            }
+        });
+    }
+
+    let contextPrompt = contextMessages.map(msg => `${msg.role}: ${msg.content}`).join('\n');
+
+    // Then, construct the full prompt
+    const fullPrompt = (contextPrompt ? contextPrompt + '\n' : '') + 'user: ' + prompt + '\nassistant:';
+
+    // Store the user message
+    conversationHistory.push({ role: 'user', content: prompt });
+
     // Add system message
     const systemMessage = document.createElement('div');
     systemMessage.className = 'message system-message';
@@ -189,7 +219,7 @@ async function generateResponse() {
     try {
         const requestBody = {
             model: selectedPersona.model,
-            prompt: prompt,
+            prompt: fullPrompt,
             temperature: selectedPersona.temperature,
             system: selectedPersona.systemPrompt
         };
@@ -244,6 +274,10 @@ async function generateResponse() {
         // After generation is complete
         systemMessage.textContent = 'Generation complete!';
         setTimeout(() => systemMessage.remove(), 1000);
+
+        // Store the assistant's response
+        conversationHistory.push({ role: 'assistant', content: fullResponse });
+
     } catch (error) {
         console.error('Error:', error);
         systemMessage.textContent = 'Error generating response: ' + error.message;
@@ -266,7 +300,7 @@ textarea.addEventListener('keydown', function(e) {
 setInterval(checkServerStatus, 5000);
 fetchModels();
 
-// Add this near the top of the file
+// Theme initialization
 function initTheme() {
     const theme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', theme);
@@ -279,11 +313,11 @@ function toggleTheme() {
     localStorage.setItem('theme', newTheme);
 }
 
-// Add this to your existing initialization code
+// Theme event listeners
 document.getElementById('darkModeToggle').addEventListener('click', toggleTheme);
 initTheme();
 
-// Add these functions to your existing script.js
+// Settings modal functions
 function openSettingsModal() {
     document.getElementById('settingsModal').style.display = 'block';
     fetchModels(); // Refresh the model list when opening settings
@@ -293,10 +327,6 @@ function closeSettingsModal() {
     document.getElementById('settingsModal').style.display = 'none';
 }
 
-// Add these event listeners to your initialization code
-document.getElementById('settingsButton').addEventListener('click', openSettingsModal);
-document.querySelector('.close-button').addEventListener('click', closeSettingsModal);
-
 // Close modal when clicking outside
 window.addEventListener('click', (event) => {
     const modal = document.getElementById('settingsModal');
@@ -305,7 +335,7 @@ window.addEventListener('click', (event) => {
     }
 });
 
-// Add the model management functions from settings.html
+// Model management functions
 function formatSize(bytes) {
     const sizes = ['B', 'KB', 'MB', 'GB'];
     if (bytes === 0) return '0 B';
@@ -342,7 +372,7 @@ async function deleteModel(modelName) {
     }
 }
 
-// Add at the top with other global variables
+// Pull model functions
 let currentPullController = null;
 
 function formatBytes(bytes) {
@@ -457,7 +487,7 @@ async function pullModel() {
     }
 }
 
-// Add cancel function
+// Cancel model pull
 function cancelModelPull() {
     if (currentPullController) {
         currentPullController.abort();
@@ -515,10 +545,10 @@ function displayImagePreview(imageData) {
     previewArea.appendChild(previewContainer);
 }
 
-// Add this to your initialization code
+// Image upload initialization
 setupImageUpload();
 
-// Add this function to handle model selection changes
+// Handle model selection changes
 function handleModelChange() {
     const modelSelect = document.getElementById('modelList');
     const imageUploadBtn = document.getElementById('imageUpload');
@@ -535,14 +565,14 @@ function handleModelChange() {
     }
 }
 
-// Add this function to create default personas from models
+// Create default personas from models
 function createDefaultPersonaFromModel(model) {
     return {
         name: model.name,
         model: model.name,
         temperature: 0.7,
         systemPrompt: '',
-        isDefault: true  // Flag to identify default model personas
+        isDefault: true
     };
 }
 
@@ -579,7 +609,7 @@ function handlePersonaChange(selectedOption) {
     }
 }
 
-// Modify updateControlsRow to include both models and personas
+// Update controls row to include both models and personas
 function updateControlsRow() {
     const controlsRow = document.querySelector('.controls-row');
     const modelSelect = document.getElementById('modelList');
@@ -604,6 +634,11 @@ function updateControlsRow() {
         </div>
         <div class="persona-select-container">
             <div class="context-controls">
+                <button class="context-button" id="clearConversationButton" title="Clear Conversation">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
                 <button class="context-button" id="fullContextButton" title="Use Full History">
                     <svg viewBox="0 0 24 24">
                         <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
@@ -643,6 +678,29 @@ function updateControlsRow() {
         handlePersonaChange(this.options[this.selectedIndex]);
     });
 
+    // Add event listeners for context buttons
+    const fullContextButton = document.getElementById('fullContextButton');
+    fullContextButton.addEventListener('click', function() {
+        useFullContext = !useFullContext;
+        this.classList.toggle('active', useFullContext);
+        // When fullContext is enabled, clear selectedContextMessages
+        if (useFullContext) {
+            selectedContextMessages = [];
+            document.getElementById('selectContextButton').classList.remove('active');
+        }
+    });
+
+    const selectContextButton = document.getElementById('selectContextButton');
+    selectContextButton.addEventListener('click', function() {
+        openContextSelectionModal();
+        // Disable fullContext when selecting context
+        useFullContext = false;
+        fullContextButton.classList.remove('active');
+    });
+
+    // Add event listener for clear conversation button
+    document.getElementById('clearConversationButton').addEventListener('click', clearConversation);
+
     // Trigger initial check for current selection
     const personaList = document.getElementById('personaList');
     if (personaList) {
@@ -650,7 +708,93 @@ function updateControlsRow() {
     }
 }
 
-// Add persona management functions
+// Open context selection modal
+function openContextSelectionModal() {
+    // Check if there's any conversation history
+    if (conversationHistory.length === 0) {
+        // If no history, disable the button and return early
+        document.getElementById('selectContextButton').classList.remove('active');
+        return;
+    }
+
+    // Toggle selection mode
+    const isSelectionMode = document.querySelector('.context-checkbox') !== null;
+    if (isSelectionMode) {
+        // If already in selection mode, save and exit
+        document.querySelectorAll('.context-checkbox').forEach(el => el.remove());
+        document.querySelectorAll('.conversation-pair').forEach(el => {
+            el.classList.remove('conversation-pair');
+        });
+        // Remove deselect all button
+        const deselectBtn = document.querySelector('.deselect-all-button');
+        if (deselectBtn) deselectBtn.remove();
+        
+        document.getElementById('selectContextButton').classList.toggle('active', selectedContextMessages.length > 0);
+        return;
+    }
+
+    // Add deselect all button
+    const controlsRow = document.querySelector('.controls-row');
+    const deselectButton = document.createElement('button');
+    deselectButton.className = 'deselect-all-button';
+    deselectButton.innerHTML = `
+        <svg viewBox="0 0 24 24" width="24" height="24">
+            <path d="M19 13H5v-2h14v2z"/>
+        </svg>
+    `;
+    deselectButton.title = "Deselect All";
+    deselectButton.onclick = function() {
+        document.querySelectorAll('.context-checkbox').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        selectedContextMessages = [];
+    };
+    controlsRow.querySelector('.context-controls').appendChild(deselectButton);
+
+    // Rest of the existing code for creating checkboxes and pairs...
+    const messages = document.querySelectorAll('.message');
+    let currentPair = null;
+    let pairIndex = 0;
+
+    messages.forEach((message, index) => {
+        if (message.classList.contains('user-message')) {
+            currentPair = document.createElement('div');
+            currentPair.className = 'conversation-pair';
+            message.parentNode.insertBefore(currentPair, message);
+            
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'context-checkbox';
+            checkbox.value = pairIndex;
+            checkbox.checked = selectedContextMessages.includes(pairIndex);
+            
+            checkbox.addEventListener('change', function() {
+                const pairIndex = parseInt(this.value);
+                if (this.checked) {
+                    if (!selectedContextMessages.includes(pairIndex)) {
+                        selectedContextMessages.push(pairIndex);
+                    }
+                } else {
+                    selectedContextMessages = selectedContextMessages.filter(i => i !== pairIndex);
+                }
+            });
+            
+            currentPair.appendChild(checkbox);
+            currentPair.appendChild(message);
+            
+            const nextMessage = messages[index + 1];
+            if (nextMessage && nextMessage.classList.contains('ai-message')) {
+                currentPair.appendChild(nextMessage);
+            }
+            
+            pairIndex++;
+        }
+    });
+
+    document.getElementById('selectContextButton').classList.add('active');
+}
+
+// Persona management functions
 function openPersonaModal() {
     const modal = document.getElementById('personaModal');
     modal.style.display = 'block';
@@ -752,26 +896,10 @@ function savePersonaEdit() {
     document.getElementById('editPersonaModal').style.display = 'none';
 }
 
-// Modify initialization code
+// Initialize UI
 document.addEventListener('DOMContentLoaded', initializeUI);
 
-// Add these new functions
-function initTabs() {
-    const tabButtons = document.querySelectorAll('.tab-button');
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            // Remove active class from all tabs
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            // Add active class to clicked tab
-            button.classList.add('active');
-            document.getElementById(`${button.dataset.tab}-tab`).classList.add('active');
-        });
-    });
-}
-
-// Add this function to handle initial setup
+// Initialize tabs and controls
 function initializeUI() {
     initTabs();
     updateControlsRow();
@@ -792,4 +920,35 @@ function initializeUI() {
     } else {
         imageUploadBtn.style.display = 'none';
     }
-} 
+}
+
+// Initialize tabs
+function initTabs() {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Remove active class from all tabs
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            button.classList.add('active');
+            document.getElementById(`${button.dataset.tab}-tab`).classList.add('active');
+        });
+    });
+}
+
+// Add the clearConversation function
+function clearConversation() {
+    if (confirm('Are you sure you want to clear the conversation?')) {
+        const responseDiv = document.getElementById('response');
+        responseDiv.innerHTML = '';
+        conversationHistory = [];
+        selectedContextMessages = [];
+        useFullContext = false;
+        
+        // Reset context buttons
+        document.getElementById('fullContextButton').classList.remove('active');
+        document.getElementById('selectContextButton').classList.remove('active');
+    }
+}

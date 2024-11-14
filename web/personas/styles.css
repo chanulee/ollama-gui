@@ -814,3 +814,41 @@ input[type="range"] {
     background: #0056b3;
     border-color: #0056b3;
 } 
+
+.conversation-pair {
+    position: relative;
+    padding-left: 30px;
+    margin: 10px 0;
+}
+
+.context-checkbox {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.message {
+    position: relative;
+    margin: 5px 0;
+}
+
+.deselect-all-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 4px;
+}
+
+.deselect-all-button:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.deselect-all-button svg {
+    fill: currentColor;
+} 
