@@ -342,9 +342,126 @@ async function deleteModel(modelName) {
     }
 }
 
+// Add at the top with other global variables
+let currentPullController = null;
+
+function formatBytes(bytes) {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
+}
+
 async function pullModel() {
-    // Copy the pullModel function from settings.html
-    // It's the same implementation as shown in the settings file
+    const modelNameInput = document.getElementById('modelName');
+    const modelName = modelNameInput.value.trim();
+    const pullButton = document.getElementById('pullButton');
+    const pullProgress = document.getElementById('pullProgress');
+    const progressFill = document.getElementById('progressFill');
+    const pullStatus = document.getElementById('pullStatus');
+    const cancelButton = document.getElementById('cancelPull');
+
+    if (!modelName) {
+        alert('Please enter a model name');
+        return;
+    }
+
+    // Create new AbortController for this pull
+    currentPullController = new AbortController();
+    
+    // Show cancel button and progress
+    pullButton.disabled = true;
+    cancelButton.style.display = 'inline-block';
+    pullProgress.style.display = 'block';
+    progressFill.style.width = '0%';
+    pullStatus.textContent = 'Starting download...';
+
+    try {
+        const response = await fetch('http://localhost:11434/api/pull', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name: modelName }),
+            signal: currentPullController.signal
+        });
+
+        const reader = response.body.getReader();
+        let receivedLength = 0;
+        let totalLength = 0;
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = new TextDecoder().decode(value);
+            const lines = chunk.split('\n').filter(line => line.trim());
+            
+            for (const line of lines) {
+                try {
+                    const data = JSON.parse(line);
+                    
+                    if (data.total) {
+                        totalLength = data.total;
+                    }
+                    
+                    if (data.completed) {
+                        receivedLength = data.completed;
+                    }
+
+                    // Update status message with detailed progress
+                    if (totalLength > 0) {
+                        const progress = (receivedLength / totalLength) * 100;
+                        progressFill.style.width = `${progress}%`;
+                        pullStatus.textContent = `${data.status || 'Downloading'} - ${formatBytes(receivedLength)} / ${formatBytes(totalLength)} (${progress.toFixed(1)}%)`;
+                    }
+                } catch (e) {
+                    console.error('Error parsing JSON:', e);
+                }
+            }
+        }
+
+        pullStatus.textContent = 'Download completed!';
+        progressFill.style.width = '100%';
+        modelNameInput.value = '';
+        await fetchModels();
+
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            pullStatus.textContent = 'Download cancelled';
+            // Clean up downloaded model
+            try {
+                await fetch('http://localhost:11434/api/delete', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name: modelName })
+                });
+            } catch (deleteError) {
+                console.error('Error cleaning up cancelled download:', deleteError);
+            }
+        } else {
+            console.error('Error pulling model:', error);
+            pullStatus.textContent = `Error: ${error.message}`;
+        }
+    } finally {
+        pullButton.disabled = false;
+        cancelButton.style.display = 'none';
+        currentPullController = null;
+        setTimeout(() => {
+            pullProgress.style.display = 'none';
+            pullStatus.textContent = '';
+        }, 3000);
+    }
+}
+
+// Add cancel function
+function cancelModelPull() {
+    if (currentPullController) {
+        currentPullController.abort();
+    }
 }
 
 function setupImageUpload() {
@@ -486,6 +603,18 @@ function updateControlsRow() {
             </select>
         </div>
         <div class="persona-select-container">
+            <div class="context-controls">
+                <button class="context-button" id="fullContextButton" title="Use Full History">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
+                    </svg>
+                </button>
+                <button class="context-button" id="selectContextButton" title="Select Context">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10H7v-2h10v2z"/>
+                    </svg>
+                </button>
+            </div>
             <select id="personaList">
                 <optgroup label="Models">
                     ${defaultPersonas.map(p => 

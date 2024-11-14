@@ -83,20 +83,14 @@
                 <div class="tab-content active" id="models-tab">
                     <div class="pull-section">
                         <h3>Pull New Model</h3>
-                        <div class="pull-input">
-                            <input type="text" id="modelName" placeholder="Enter model name (e.g., llama2, mistral, codellama)">
-                            <button class="btn btn-primary" onclick="pullModel()" id="pullButton">
-                                Pull Model
-                            </button>
-                            <a href="https://ollama.com/library" target="_blank" class="btn btn-primary">
-                                Browse Library
-                            </a>
-                        </div>
-                        <div id="pullProgress" style="display: none;">
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="progressFill"></div>
+                        <div class="pull-controls">
+                            <input type="text" id="modelName" placeholder="Enter model name (e.g., llama2:latest)">
+                            <button id="pullButton" class="btn btn-primary" onclick="pullModel()">Pull Model</button>
+                            <button id="cancelPull" class="btn btn-danger" onclick="cancelModelPull()" style="display: none;">Cancel</button>
+                            <div id="pullProgress" class="progress-bar" style="display: none;">
+                                <div id="progressFill" class="progress-fill"></div>
                             </div>
-                            <div class="status-message" id="pullStatus"></div>
+                            <div id="pullStatus" class="status-text"></div>
                         </div>
                     </div>
 
