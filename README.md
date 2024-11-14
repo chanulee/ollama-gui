@@ -4,8 +4,9 @@ No need for Docker, nodejs - just ollama, terminal and web browser.
 
 ## Table of Contents
 - [Directory](#directory)
-  - [1. 0-basic](#1-0-basic)
-  - [2. 1-chat](#2-1-chat)
+  - [1. basic-poc](#1-basic-poc)
+  - [2. chat](#2-chat)
+  - [3. personas](#3-personas)
 - [Beginner's guide](#beginners-guide)
 - [Ollama terminal commands](#ollama-terminal-commands)
 - [Model instructions](#model-instructions)
