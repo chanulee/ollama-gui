@@ -55,7 +55,7 @@
 
             <div class="input-row">
                 <div class="prompt-container">
-                    <textarea id="prompt" placeholder="Type your message here..." rows="1"></textarea>
+                    <textarea id="prompt" placeholder="Enter your prompt..."></textarea>
                     <button id="imageUpload" class="image-upload-button" title="Upload Image">
                         <svg class="image-icon" viewBox="0 0 24 24">
                             <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
@@ -76,10 +76,7 @@
     <div id="settingsModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="tab-container">
-                    <button class="tab-button active" data-tab="models">Models</button>
-                    <button class="tab-button" data-tab="personas">Personas</button>
-                </div>
+                <h2>Model Management</h2>
                 <button class="close-button">&times;</button>
             </div>
             <div class="modal-body">
@@ -106,14 +103,6 @@
                     <h3>Installed Models</h3>
                     <div class="model-grid" id="modelGrid">
                         <!-- Models will be populated here -->
-                    </div>
-                </div>
-                <div class="tab-content" id="personas-tab">
-                    <div class="persona-section">
-                        <button class="btn btn-primary" onclick="editPersona()">Add New Persona</button>
-                        <div class="persona-grid" id="personaGrid">
-                            <!-- Personas will be populated here -->
-                        </div>
                     </div>
                 </div>
             </div>
@@ -145,6 +134,21 @@
                     <textarea id="editPersonaSystemPrompt" rows="4" placeholder="Enter system prompt"></textarea>
                 </div>
                 <button class="btn btn-primary" onclick="savePersonaEdit()">Save Persona</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="personaModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Manage Personas</h2>
+                <button class="close-button" onclick="closePersonaModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <button class="btn btn-primary" onclick="editPersona()">Add New Persona</button>
+                <div class="persona-grid" id="personaGrid">
+                    <!-- Personas will be populated here -->
+                </div>
             </div>
         </div>
     </div>

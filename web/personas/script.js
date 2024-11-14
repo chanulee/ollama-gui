@@ -105,6 +105,9 @@ async function fetchModels() {
                     ).join('')}
                 </optgroup>
             `;
+            
+            // After updating the list, trigger the persona change handler
+            handlePersonaChange(personaList.options[personaList.selectedIndex]);
         }
 
         // Update model select in persona editor
@@ -195,6 +198,11 @@ async function generateResponse() {
         if (selectedImage) {
             requestBody.images = [selectedImage];
         }
+
+        console.log('Request body:', {
+            ...requestBody,
+            images: requestBody.images ? ['[base64 data]'] : undefined
+        });
 
         const response = await fetch('http://localhost:11434/api/generate', {
             method: 'POST',
@@ -347,9 +355,6 @@ function setupImageUpload() {
     fileInput.style.display = 'none';
     document.body.appendChild(fileInput);
 
-    // Set initial visibility to none
-    imageUploadBtn.style.display = 'none';
-
     imageUploadBtn.addEventListener('click', () => {
         fileInput.click();
     });
@@ -362,8 +367,8 @@ function handleImageUpload(event) {
     if (file && file.type.startsWith('image/')) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            selectedImage = e.target.result;
-            displayImagePreview(selectedImage);
+            selectedImage = e.target.result.split(',')[1];
+            displayImagePreview(e.target.result);
         };
         reader.readAsDataURL(file);
     }
@@ -424,6 +429,39 @@ function createDefaultPersonaFromModel(model) {
     };
 }
 
+function handlePersonaChange(selectedOption) {
+    const isDefault = selectedOption.getAttribute('data-is-default') === 'true';
+    const selectedName = selectedOption.value;
+    const imageUploadBtn = document.getElementById('imageUpload');
+    
+    let selectedPersona;
+    if (isDefault) {
+        selectedPersona = {
+            name: selectedName,
+            model: selectedName,
+            temperature: 0.7,
+            systemPrompt: ''
+        };
+    } else {
+        selectedPersona = personas.find(p => p.name === selectedName);
+    }
+
+    if (selectedPersona) {
+        // Update image upload button visibility based on model
+        imageUploadBtn.style.display = 
+            selectedPersona.model === 'llama3.2-vision:latest' ? 'block' : 'none';
+
+        // Update other controls...
+        document.getElementById('modelList').value = selectedPersona.model;
+        const temperatureSlider = document.getElementById('temperature');
+        const temperatureValue = document.getElementById('temperatureValue');
+        if (temperatureSlider && temperatureValue) {
+            temperatureSlider.value = selectedPersona.temperature;
+            temperatureValue.textContent = selectedPersona.temperature;
+        }
+    }
+}
+
 // Modify updateControlsRow to include both models and personas
 function updateControlsRow() {
     const controlsRow = document.querySelector('.controls-row');
@@ -473,28 +511,14 @@ function updateControlsRow() {
 
     // Add event listener for persona selection
     document.getElementById('personaList').addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        const isDefault = selectedOption.getAttribute('data-is-default') === 'true';
-        const selectedName = this.value;
-        
-        let selectedPersona;
-        if (isDefault) {
-            selectedPersona = defaultPersonas.find(p => p.name === selectedName);
-        } else {
-            selectedPersona = personas.find(p => p.name === selectedName);
-        }
-
-        if (selectedPersona) {
-            // Update the model and temperature if needed
-            document.getElementById('modelList').value = selectedPersona.model;
-            const temperatureSlider = document.getElementById('temperature');
-            const temperatureValue = document.getElementById('temperatureValue');
-            if (temperatureSlider && temperatureValue) {
-                temperatureSlider.value = selectedPersona.temperature;
-                temperatureValue.textContent = selectedPersona.temperature;
-            }
-        }
+        handlePersonaChange(this.options[this.selectedIndex]);
     });
+
+    // Trigger initial check for current selection
+    const personaList = document.getElementById('personaList');
+    if (personaList) {
+        handlePersonaChange(personaList.options[personaList.selectedIndex]);
+    }
 }
 
 // Add persona management functions
@@ -600,18 +624,7 @@ function savePersonaEdit() {
 }
 
 // Modify initialization code
-document.addEventListener('DOMContentLoaded', () => {
-    initTabs();
-    updateControlsRow();
-    
-    // Add event listeners for persona management
-    document.getElementById('personaButton').addEventListener('click', openPersonaModal);
-    document.querySelectorAll('.close-button').forEach(button => {
-        button.addEventListener('click', e => {
-            e.target.closest('.modal').style.display = 'none';
-        });
-    });
-});
+document.addEventListener('DOMContentLoaded', initializeUI);
 
 // Add these new functions
 function initTabs() {
@@ -627,4 +640,27 @@ function initTabs() {
             document.getElementById(`${button.dataset.tab}-tab`).classList.add('active');
         });
     });
+}
+
+// Add this function to handle initial setup
+function initializeUI() {
+    initTabs();
+    updateControlsRow();
+    
+    // Add event listeners for persona management
+    document.getElementById('personaButton').addEventListener('click', openPersonaModal);
+    document.querySelectorAll('.close-button').forEach(button => {
+        button.addEventListener('click', e => {
+            e.target.closest('.modal').style.display = 'none';
+        });
+    });
+
+    // Set initial image upload button visibility
+    const imageUploadBtn = document.getElementById('imageUpload');
+    const personaList = document.getElementById('personaList');
+    if (personaList && personaList.value === 'llama3.2-vision:latest') {
+        imageUploadBtn.style.display = 'block';
+    } else {
+        imageUploadBtn.style.display = 'none';
+    }
 } 
