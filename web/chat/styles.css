@@ -6,6 +6,16 @@ body {
     color: #333;
 }
 
+h2 {
+    margin: 0;
+    margin-bottom: 16px;
+}
+
+h3 {
+    margin: 0;
+    margin-bottom: 16px;
+}
+
 .container {
     display: flex;
     flex-direction: column;
@@ -18,11 +28,14 @@ body {
 
 .status-bar {
     display: flex;
+    margin: 8px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
+    padding: 8px 16px;
     background: #f8f9fa;
-    border-bottom: 1px solid #ddd;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .status-bar h1 {
@@ -33,7 +46,7 @@ body {
 .response-area {
     flex-grow: 1;
     overflow-y: auto;
-    padding: 20px;
+    padding: 16px;
     margin: 0;
     background: white;
     border: none;
@@ -41,16 +54,19 @@ body {
 }
 
 .input-section {
-    border-top: 1px solid #ddd;
-    padding: 20px;
+    padding: 16px;
+    border: 1px solid #ddd;
     background: #f8f9fa;
+    margin: 8px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .header {
     display: flex;
     align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
+    gap: 16px;
+    margin-bottom: 16px;
 }
 
 .server-status {
@@ -79,23 +95,22 @@ body {
 
 .input-row {
     display: flex;
-    gap: 10px;
-    margin-bottom: 5px;
+    gap: 8px;
+    margin-bottom: 0px;
     width: 100%;
 }
 
 .prompt-container {
     position: relative;
     display: flex;
-    flex-direction: column;
     flex-grow: 1;
 }
 
 textarea {
     width: 100%;
-    padding: 15px 45px 15px 15px;
+    padding: 16px 48px 16px 16px;
     border: 1px solid #ddd;
-    border-radius: 20px;
+    border-radius: 8px;
     resize: none;
     font-size: 16px;
     line-height: 1.4;
@@ -107,7 +122,7 @@ textarea {
 #generate {
     width: 54px;
     height: 54px;
-    border-radius: 27px;
+    border-radius: 8px;
     background: #007bff;
     color: white;
     border: none;
@@ -130,10 +145,10 @@ textarea {
 
 .controls-row {
     display: flex;
-    gap: 20px;
+    gap: 16px;
     align-items: center;
-    padding: 10px 0;
-    margin-bottom: 15px;
+    padding: 0;
+    margin-bottom: 8px;
 }
 
 .model-select-container {
@@ -159,7 +174,7 @@ select {
     flex-grow: 1;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
 input[type="range"] {
@@ -167,13 +182,24 @@ input[type="range"] {
 }
 
 .temperature-value {
-    min-width: 40px;
+    min-width: 48px;
     text-align: right;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+.temperature-value:hover {
+    background-color: #f0f0f0;
+}
+
+[data-theme="dark"] .temperature-value:hover {
+    background-color: #333;
 }
 
 #response {
     margin-top: 0;
-    padding: 15px;
+    padding: 16px;
     background: white;
     border-radius: 8px;
     border: none;
@@ -192,8 +218,8 @@ input[type="range"] {
 }
 
 .message {
-    margin-bottom: 20px;
-    padding: 15px;
+    margin-bottom: 16px;
+    padding: 16px;
     border-radius: 8px;
 }
 
@@ -213,7 +239,7 @@ input[type="range"] {
     background: #ffffff;
     border: 1px solid #e5e7eb;
     margin-bottom: 20px;
-    padding: 15px;
+    padding: 16px;
     border-radius: 8px;
 }
 
@@ -222,9 +248,14 @@ input[type="range"] {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 5px;
-    margin-right: 10px;
+    padding: 4px;
+    margin-right: 8px;
     border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
 }
 
 .theme-icon {
@@ -251,6 +282,7 @@ input[type="range"] {
 [data-theme="dark"] .input-section {
     background: #2a2a2a;
     border-color: #333;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 [data-theme="dark"] .response-area {
@@ -384,8 +416,8 @@ input[type="range"] {
 .modal-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+    align-items: flex-start;
+    margin-bottom: 16px;
 }
 
 .close-button {
@@ -401,8 +433,8 @@ input[type="range"] {
 }
 
 .pull-section {
-    margin-bottom: 20px;
-    padding: 20px;
+    margin-bottom: 32px;
+    padding: 16px;
     background: #f8f9fa;
     border-radius: 8px;
     border: 1px solid #ddd;
@@ -415,8 +447,7 @@ input[type="range"] {
 
 .pull-input {
     display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 8px;
 }
 
 .model-grid {
@@ -563,4 +594,43 @@ input[type="range"] {
     align-items: center;
     justify-content: center;
     font-size: 14px;
+}
+
+/* Update icon styles */
+.material-icons {
+    font-size: 24px;
+}
+
+.icon-button .material-icons {
+    color: #666;
+}
+
+.theme-icon {
+    color: #666;
+}
+
+[data-theme="dark"] .icon-button .material-icons,
+[data-theme="dark"] .theme-icon {
+    color: #fff;
+}
+
+/* Remove old SVG-specific styles */
+.settings-icon,
+.send-icon,
+.image-icon,
+.sun-icon,
+.moon-icon {
+    display: none;
+}
+
+#generate .material-icons {
+    color: white;
+}
+
+.image-upload-button .material-icons {
+    color: #666;
+}
+
+[data-theme="dark"] .image-upload-button .material-icons {
+    color: #fff;
 } 

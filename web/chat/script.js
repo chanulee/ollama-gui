@@ -12,8 +12,40 @@ textarea.addEventListener('input', function() {
 const temperatureSlider = document.getElementById('temperature');
 const temperatureValue = document.getElementById('temperatureValue');
 temperatureSlider.addEventListener('input', function() {
-    temperatureValue.textContent = this.value;
+    updateTemperatureValue(this.value);
 });
+
+// Add click handler to make temperature value editable
+temperatureValue.addEventListener('click', function() {
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.min = '0';
+    input.max = '2';
+    input.step = '0.1';
+    input.value = this.textContent;
+    input.style.width = '50px';
+    
+    input.addEventListener('blur', function() {
+        const newValue = Math.min(Math.max(parseFloat(this.value) || 0, 0), 2);
+        updateTemperatureValue(newValue);
+        temperatureSlider.value = newValue;
+    });
+
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            this.blur();
+        }
+    });
+
+    this.textContent = '';
+    this.appendChild(input);
+    input.focus();
+});
+
+function updateTemperatureValue(value) {
+    const formattedValue = parseFloat(value).toFixed(1);
+    temperatureValue.textContent = formattedValue;
+}
 
 async function checkServerStatus() {
     const statusIndicator = document.getElementById('serverStatus');
@@ -225,6 +257,10 @@ fetchModels();
 function initTheme() {
     const theme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', theme);
+    
+    // Set initial theme icon
+    const themeIcon = document.querySelector('.theme-toggle .material-icons');
+    themeIcon.textContent = theme === 'dark' ? 'light_mode' : 'dark_mode';
 }
 
 function toggleTheme() {
@@ -232,9 +268,13 @@ function toggleTheme() {
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
+    
+    // Update theme icon
+    const themeIcon = document.querySelector('.theme-toggle .material-icons');
+    themeIcon.textContent = newTheme === 'dark' ? 'light_mode' : 'dark_mode';
 }
 
-// Add this to your existing initialization code
+// Add this to your initialization code
 document.getElementById('darkModeToggle').addEventListener('click', toggleTheme);
 initTheme();
 
