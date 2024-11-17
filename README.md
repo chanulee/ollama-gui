@@ -2,14 +2,15 @@
 ollama-gui is a simple gui for ollama, local llm.  
 No need for Docker, nodejs - just ollama, terminal and web browser.  
 
-## Table of Contents
+## Aim
+Basically this project is all about giving more power to user of llms. Hence, opensource and 
+
 - [Directory](#directory)
   - [1. basic-poc](#1-basic-poc)
   - [2. chat](#2-chat)
   - [3. personas](#3-personas)
 - [Beginner's guide](#beginners-guide)
 - [Ollama terminal commands](#ollama-terminal-commands)
-- [Model instructions](#model-instructions)
 - [For future reference](#for-future-reference)
 
 ## Directory
@@ -58,7 +59,7 @@ While ollama server running, this is API command. Get rid of the stream: false i
 ```bash
 http://localhost:11434/api/generate -d '{ "model": "mistral-nemo", "prompt": "What is water made of?", "stream": false }'
 ```
-
+---
 ## For future reference
 - Making a custom model using huggingface model https://www.youtube.com/watch?v=bXf2Cxf3Wk0
 - Customisation of existing model (llama) 
