@@ -2,32 +2,13 @@
 ollama-gui is a simple gui for ollama, local llm.  
 No need for Docker, nodejs - just ollama, terminal and web browser.  
 
-## Aim
-Basically this project is all about giving more power to user of llms. Hence, opensource and 
-
-- [Directory](#directory)
-  - [1. basic-poc](#1-basic-poc)
-  - [2. chat](#2-chat)
-  - [3. personas](#3-personas)
-- [Beginner's guide](#beginners-guide)
-- [Ollama terminal commands](#ollama-terminal-commands)
-- [For future reference](#for-future-reference)
-
-## Directory
-higher the number, more experimental (with higer capability) it gets
-### 1. basic-poc
-basic-poc is a proof of concept sketch/prototype of on-board ai.
-### 2. chat
-Main chat UI project folder. Features include:
+## Features
 1) Basic prompting - model selection, temperature
 2) Model manager - pull new model, view and delete models
 3) Image input for [llama3.2-vision:latest](https://ollama.com/library/llama3.2-vision)
 4) Server status
 5) Dark mode
-### 3. personas
-Flagship interface 
-1) User defined personas
-2) image upload for llama3.2-vision
+6) User defined personas
 
 ---
 
