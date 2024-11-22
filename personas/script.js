@@ -635,19 +635,13 @@ function updateControlsRow() {
         <div class="persona-select-container">
             <div class="context-controls">
                 <button class="context-button" id="clearConversationButton" title="Clear Conversation">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                    </svg>
+                    <span class="material-icons">clear</span>
                 </button>
                 <button class="context-button" id="fullContextButton" title="Use Full History">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
-                    </svg>
+                    <span class="material-icons">select_all</span>
                 </button>
                 <button class="context-button" id="selectContextButton" title="Select Context">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10H7v-2h10v2z"/>
-                    </svg>
+                    <span class="material-icons">checklist</span>
                 </button>
             </div>
             <select id="personaList">
@@ -663,9 +657,7 @@ function updateControlsRow() {
                 </optgroup>
             </select>
             <button id="personaButton" class="icon-button" title="Manage Personas">
-                <svg class="persona-icon" viewBox="0 0 24 24">
-                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                </svg>
+                <span class="material-icons">person</span>
             </button>
         </div>
     `;
@@ -737,11 +729,7 @@ function openContextSelectionModal() {
     const controlsRow = document.querySelector('.controls-row');
     const deselectButton = document.createElement('button');
     deselectButton.className = 'deselect-all-button';
-    deselectButton.innerHTML = `
-        <svg viewBox="0 0 24 24" width="24" height="24">
-            <path d="M19 13H5v-2h14v2z"/>
-        </svg>
-    `;
+    deselectButton.innerHTML = '<span class="material-icons">remove</span>';
     deselectButton.title = "Deselect All";
     deselectButton.onclick = function() {
         document.querySelectorAll('.context-checkbox').forEach(checkbox => {
@@ -906,6 +894,11 @@ function initializeUI() {
     
     // Add event listeners for persona management
     document.getElementById('personaButton').addEventListener('click', openPersonaModal);
+    
+    // Add settings button click handler
+    document.getElementById('settingsButton').addEventListener('click', openSettingsModal);
+    
+    // Add close button handlers
     document.querySelectorAll('.close-button').forEach(button => {
         button.addEventListener('click', e => {
             e.target.closest('.modal').style.display = 'none';

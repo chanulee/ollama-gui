@@ -6,6 +6,16 @@ body {
     color: #333;
 }
 
+h2 {
+    margin: 0;
+    margin-bottom: 16px;
+}
+
+h3 {
+    margin: 0;
+    margin-bottom: 16px;
+}
+
 .container {
     display: flex;
     flex-direction: column;
@@ -14,15 +24,20 @@ body {
     padding: 0;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin: 0;
 }
 
 .status-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
+    padding: 8px 16px;
     background: #f8f9fa;
-    border-bottom: 1px solid #ddd;
+    margin: 8px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    padding: 8px 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .status-bar h1 {
@@ -33,7 +48,7 @@ body {
 .response-area {
     flex-grow: 1;
     overflow-y: auto;
-    padding: 20px;
+    padding: 16px;
     margin: 0;
     background: white;
     border: none;
@@ -41,16 +56,19 @@ body {
 }
 
 .input-section {
-    border-top: 1px solid #ddd;
-    padding: 20px;
+    padding: 16px;
+    border: 1px solid #ddd;
     background: #f8f9fa;
+    margin: 8px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .header {
     display: flex;
     align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
+    gap: 16px;
+    margin-bottom: 16px;
 }
 
 .server-status {
@@ -79,23 +97,22 @@ body {
 
 .input-row {
     display: flex;
-    gap: 10px;
-    margin-bottom: 5px;
+    gap: 8px;
+    margin-bottom: 0px;
     width: 100%;
 }
 
 .prompt-container {
     position: relative;
     display: flex;
-    flex-direction: column;
     flex-grow: 1;
 }
 
 textarea {
     width: 100%;
-    padding: 15px 45px 15px 15px;
+    padding: 16px 48px 16px 16px;
     border: 1px solid #ddd;
-    border-radius: 20px;
+    border-radius: 8px;
     resize: none;
     font-size: 16px;
     line-height: 1.4;
@@ -107,7 +124,7 @@ textarea {
 #generate {
     width: 54px;
     height: 54px;
-    border-radius: 27px;
+    border-radius: 8px;
     background: #007bff;
     color: white;
     border: none;
@@ -130,17 +147,14 @@ textarea {
 
 .controls-row {
     display: flex;
-    gap: 20px;
+    gap: 16px;
     align-items: center;
-    padding: 10px 0;
-    margin-bottom: 15px;
+    padding: 0;
+    margin-bottom: 8px;
 }
 
 .model-select-container {
     flex: 1;
-    display: flex;
-    gap: 10px;
-    align-items: center;
 }
 
 .model-select-container select {
@@ -166,7 +180,7 @@ select {
     flex-grow: 1;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
 input[type="range"] {
@@ -174,13 +188,24 @@ input[type="range"] {
 }
 
 .temperature-value {
-    min-width: 40px;
+    min-width: 48px;
     text-align: right;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+.temperature-value:hover {
+    background-color: #f0f0f0;
+}
+
+[data-theme="dark"] .temperature-value:hover {
+    background-color: #333;
 }
 
 #response {
     margin-top: 0;
-    padding: 15px;
+    padding: 16px;
     background: white;
     border-radius: 8px;
     border: none;
@@ -199,8 +224,8 @@ input[type="range"] {
 }
 
 .message {
-    margin-bottom: 20px;
-    padding: 15px;
+    margin-bottom: 16px;
+    padding: 16px;
     border-radius: 8px;
 }
 
@@ -220,7 +245,7 @@ input[type="range"] {
     background: #ffffff;
     border: 1px solid #e5e7eb;
     margin-bottom: 20px;
-    padding: 15px;
+    padding: 16px;
     border-radius: 8px;
 }
 
@@ -229,9 +254,14 @@ input[type="range"] {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 5px;
-    margin-right: 10px;
+    padding: 4px;
+    margin-right: 8px;
     border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
 }
 
 .theme-icon {
@@ -258,6 +288,7 @@ input[type="range"] {
 [data-theme="dark"] .input-section {
     background: #2a2a2a;
     border-color: #333;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 [data-theme="dark"] .response-area {
@@ -343,7 +374,7 @@ input[type="range"] {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 5px;
+    padding: 4px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -376,8 +407,8 @@ input[type="range"] {
     background: white;
     margin: 50px auto;
     padding: 20px;
-    width: 90%;
-    max-width: 600px;
+    width: 80%;
+    max-width: 800px;
     border-radius: 8px;
     max-height: 80vh;
     overflow-y: auto;
@@ -391,8 +422,8 @@ input[type="range"] {
 .modal-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+    align-items: flex-start;
+    margin-bottom: 16px;
 }
 
 .close-button {
@@ -408,8 +439,8 @@ input[type="range"] {
 }
 
 .pull-section {
-    margin-bottom: 20px;
-    padding: 20px;
+    margin-bottom: 32px;
+    padding: 16px;
     background: #f8f9fa;
     border-radius: 8px;
     border: 1px solid #ddd;
@@ -422,8 +453,7 @@ input[type="range"] {
 
 .pull-input {
     display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 8px;
 }
 
 .model-grid {
@@ -437,7 +467,7 @@ input[type="range"] {
     background: #f8f9fa;
     border: 1px solid #ddd;
     border-radius: 8px;
-    padding: 15px;
+    padding: 16px;
 }
 
 [data-theme="dark"] .model-card {
@@ -451,7 +481,7 @@ input[type="range"] {
     background: #eee;
     border-radius: 2px;
     overflow: hidden;
-    margin-top: 10px;
+    margin-top: 8px;
 }
 
 .progress-fill {
@@ -463,7 +493,7 @@ input[type="range"] {
 .model-meta {
     font-size: 0.9em;
     color: #666;
-    margin-bottom: 15px;
+    margin-bottom: 16px;
 }
 
 [data-theme="dark"] .model-meta {
@@ -472,11 +502,11 @@ input[type="range"] {
 
 .tag {
     display: inline-block;
-    padding: 2px 6px;
+    padding: 2px 8px;
     background: #e9ecef;
     border-radius: 4px;
     font-size: 0.8em;
-    margin-right: 5px;
+    margin-right: 4px;
 }
 
 [data-theme="dark"] .tag {
@@ -492,7 +522,7 @@ input[type="range"] {
     font-size: 14px;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
 }
 
 .btn-danger {
@@ -516,12 +546,12 @@ input[type="range"] {
 
 .image-upload-button {
     position: absolute;
-    right: 15px;
-    bottom: 15px;
+    right: 16px;
+    bottom: 16px;
     background: none;
     border: none;
     cursor: pointer;
-    padding: 5px;
+    padding: 4px;
     border-radius: 50%;
 }
 
@@ -536,9 +566,9 @@ input[type="range"] {
 }
 
 .image-preview {
-    margin-top: 10px;
+    margin-top: 8px;
     display: flex;
-    gap: 10px;
+    gap: 8px;
     flex-wrap: wrap;
 }
 
@@ -716,11 +746,11 @@ input[type="range"] {
     color: #aaa;
 }
 
-/* Add new styles for the context controls */
+/* Update context controls for Material Icons */
 .context-controls {
     display: flex;
-    gap: 5px;
-    margin-right: 10px;
+    gap: 4px;
+    margin-right: 8px;
 }
 
 .context-button {
@@ -740,10 +770,9 @@ input[type="range"] {
     background: #e9ecef;
 }
 
-.context-button svg {
-    width: 16px;
-    height: 16px;
-    fill: #666;
+.context-button .material-icons {
+    font-size: 20px;
+    color: #666;
 }
 
 /* Dark mode styles for context buttons */
@@ -756,16 +785,8 @@ input[type="range"] {
     background: #333;
 }
 
-[data-theme="dark"] .context-button svg {
-    fill: #fff;
-}
-
-/* Modify the existing persona-select-container to accommodate the new buttons */
-.persona-select-container {
-    flex: 1;
-    display: flex;
-    gap: 10px;
-    align-items: center;
+[data-theme="dark"] .context-button .material-icons {
+    color: #fff;
 }
 
 /* Style for active context button */
@@ -774,8 +795,8 @@ input[type="range"] {
     border-color: #0056b3;
 }
 
-.context-button.active svg {
-    fill: white;
+.context-button.active .material-icons {
+    color: white;
 }
 
 [data-theme="dark"] .context-button.active {
@@ -851,4 +872,76 @@ input[type="range"] {
 
 .deselect-all-button svg {
     fill: currentColor;
+} 
+
+/* Remove SVG-specific icon styles */
+.settings-icon,
+.send-icon,
+.image-icon,
+.theme-icon,
+.sun-icon,
+.moon-icon,
+.persona-icon {
+    display: none;
+}
+
+/* Add Material Icons base styles */
+.material-icons {
+    font-size: 24px;
+}
+
+/* Icon button styles */
+.icon-button .material-icons {
+    color: #666;
+}
+
+[data-theme="dark"] .icon-button .material-icons {
+    color: #fff;
+}
+
+/* Theme toggle button */
+.theme-toggle .material-icons {
+    color: #666;
+}
+
+[data-theme="dark"] .theme-toggle .material-icons {
+    color: #fff;
+}
+
+/* Generate button icon */
+#generate .material-icons {
+    color: white;
+}
+
+/* Image upload button */
+.image-upload-button .material-icons {
+    color: #666;
+}
+
+[data-theme="dark"] .image-upload-button .material-icons {
+    color: #fff;
+}
+
+/* Context button icons */
+.context-button .material-icons {
+    font-size: 20px;
+    color: #666;
+}
+
+[data-theme="dark"] .context-button .material-icons {
+    color: #fff;
+}
+
+.context-button.active .material-icons {
+    color: white;
+}
+
+/* Deselect button icon */
+.deselect-all-button .material-icons {
+    font-size: 20px;
+    color: #666;
+}
+
+[data-theme="dark"] .deselect-all-button .material-icons {
+    color: #fff;
 } 
