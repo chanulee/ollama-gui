@@ -1,0 +1,154 @@
+<!-- web/0-basic/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Persona Studio</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="status-bar">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <button onclick="window.location.href='index.html'" class="icon-button" title="Back to Home">
+                    <span class="material-icons">arrow_back</span>
+                </button>
+                <h1>Persona Studio</h1>
+            </div>
+            <div class="server-status">
+                <button id="settingsButton" class="icon-button" title="Manage Models">
+                    <span class="material-icons">settings</span>
+                </button>
+                <button id="darkModeToggle" class="theme-toggle">
+                    <span class="material-icons">brightness_4</span>
+                </button>
+                <span class="status-indicator" id="serverStatus"></span>
+                <span id="serverStatusText">Checking server...</span>
+            </div>
+        </div>
+
+        <div id="response" class="response-area"></div>
+        
+        <div class="input-section">
+            <div class="controls-row">
+                <div class="persona-select-container">
+                    <select id="personaList">
+                        <option value="loading">Loading models and personas...</option>
+                    </select>
+                </div>
+                <div class="temperature-container">
+                    <label for="temperature">Temperature:</label>
+                    <div class="slider-container">
+                        <input type="range" id="temperature" min="0" max="2" step="0.1" value="0.7">
+                        <span class="temperature-value" id="temperatureValue">0.7</span>
+                    </div>
+                </div>
+                <div class="context-controls">
+                    <button class="context-button" id="clearConversationButton" title="Clear Conversation">
+                        <span class="material-icons">clear_all</span>
+                    </button>
+                    <button class="context-button" id="fullContextButton" title="Use Full History">
+                        <span class="material-icons">select_all</span>
+                    </button>
+                    <button class="context-button" id="selectContextButton" title="Select Context">
+                        <span class="material-icons">checklist</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="input-row">
+                <div class="prompt-container">
+                    <textarea id="prompt" placeholder="Enter your prompt..."></textarea>
+                    <button id="imageUpload" class="image-upload-button" title="Upload Image">
+                        <span class="material-icons">image</span>
+                    </button>
+                    <div id="imagePreview" class="image-preview"></div>
+                </div>
+                <button id="generate" onclick="generateResponse()">
+                    <span class="material-icons">send</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Model Management</h2>
+                <button class="close-button">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="tab-content active" id="models-tab">
+                    <div class="pull-section">
+                        <h3>Pull New Model</h3>
+                        <div class="pull-controls">
+                            <input type="text" id="modelName" placeholder="Enter model name (e.g., llama2:latest)">
+                            <button id="pullButton" class="btn btn-primary" onclick="pullModel()">Pull Model</button>
+                            <button id="cancelPull" class="btn btn-danger" onclick="cancelModelPull()" style="display: none;">Cancel</button>
+                            <div id="pullProgress" class="progress-bar" style="display: none;">
+                                <div id="progressFill" class="progress-fill"></div>
+                            </div>
+                            <div id="pullStatus" class="status-text"></div>
+                        </div>
+                    </div>
+
+                    <h3>Installed Models</h3>
+                    <div class="model-grid" id="modelGrid">
+                        <!-- Models will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="editPersonaModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Persona</h2>
+                <button class="close-button" onclick="document.getElementById('editPersonaModal').style.display='none'">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="editPersonaName">Name:</label>
+                    <input type="text" id="editPersonaName" placeholder="Enter persona name">
+                </div>
+                <div class="form-group">
+                    <label for="editPersonaModel">Model:</label>
+                    <select id="editPersonaModel"></select>
+                </div>
+                <div class="form-group">
+                    <label for="editPersonaTemperature">Temperature:</label>
+                    <input type="range" id="editPersonaTemperature" min="0" max="2" step="0.1" value="0.7">
+                    <span id="editPersonaTemperatureValue">0.7</span>
+                </div>
+                <div class="form-group">
+                    <label for="editPersonaSystemPrompt">System Prompt:</label>
+                    <textarea id="editPersonaSystemPrompt" rows="4" placeholder="Enter system prompt"></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="savePersonaEdit()">Save Persona</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="personaModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Manage Personas</h2>
+                <button class="close-button" onclick="closePersonaModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <button class="btn btn-primary" onclick="editPersona()">Add New Persona</button>
+                <div class="persona-grid" id="personaGrid">
+                    <!-- Personas will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

@@ -147,14 +147,15 @@ textarea {
 
 .controls-row {
     display: flex;
-    gap: 16px;
     align-items: center;
-    padding: 0;
-    margin-bottom: 8px;
+    gap: 16px;
+    margin-bottom: 12px;
 }
 
-.model-select-container {
-    flex: 1;
+.model-select-container,
+.temperature-container,
+.persona-select-container {
+    flex: 0 1 auto;
 }
 
 .model-select-container select {
@@ -162,10 +163,10 @@ textarea {
 }
 
 .temperature-container {
-    flex: 1;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    min-width: 200px;
 }
 
 select {
@@ -177,10 +178,10 @@ select {
 }
 
 .slider-container {
-    flex-grow: 1;
     display: flex;
     align-items: center;
     gap: 8px;
+    flex: 1;
 }
 
 input[type="range"] {
@@ -692,10 +693,10 @@ input[type="range"] {
 }
 
 .persona-select-container {
-    flex: 1;
     display: flex;
-    gap: 10px;
+    gap: 8px;
     align-items: center;
+    min-width: 200px;
 }
 
 .persona-select-container select {
@@ -750,49 +751,31 @@ input[type="range"] {
 .context-controls {
     display: flex;
     gap: 4px;
-    margin-right: 8px;
+    margin-left: auto;
 }
 
 .context-button {
     padding: 6px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    background: #f8f9fa;
+    background: transparent;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 32px;
     height: 32px;
+    transition: all 0.2s ease;
 }
 
 .context-button:hover {
-    background: #e9ecef;
+    background: #f0f0f0;
 }
 
-.context-button .material-icons {
-    font-size: 20px;
-    color: #666;
-}
-
-/* Dark mode styles for context buttons */
-[data-theme="dark"] .context-button {
-    background: #2a2a2a;
-    border-color: #404040;
-}
-
-[data-theme="dark"] .context-button:hover {
-    background: #333;
-}
-
-[data-theme="dark"] .context-button .material-icons {
-    color: #fff;
-}
-
-/* Style for active context button */
 .context-button.active {
     background: #007bff;
     border-color: #0056b3;
+    color: white;
 }
 
 .context-button.active .material-icons {
@@ -802,6 +785,36 @@ input[type="range"] {
 [data-theme="dark"] .context-button.active {
     background: #0056b3;
     border-color: #004085;
+    color: white;
+}
+
+[data-theme="dark"] .context-button.active .material-icons {
+    color: white;
+}
+
+/* Base styles for context buttons */
+.context-button {
+    padding: 6px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    transition: all 0.2s ease;
+}
+
+.context-button .material-icons {
+    font-size: 20px;
+    color: #666;
+    transition: color 0.2s ease;
+}
+
+[data-theme="dark"] .context-button .material-icons {
+    color: #fff;
 }
 
 /* Selection mode styles */

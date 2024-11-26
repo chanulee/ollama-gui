@@ -5,7 +5,8 @@ let personas = JSON.parse(localStorage.getItem('personas')) || [
         name: 'Default Assistant',
         model: 'mistral-nemo:latest',
         temperature: 0.7,
-        systemPrompt: ''
+        systemPrompt: '',
+        isDefault: true
     }
 ];
 
@@ -19,6 +20,7 @@ const textarea = document.getElementById('prompt');
 textarea.addEventListener('input', function() {
     this.style.height = 'auto';
     this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+    handlePromptInput();
 });
 
 // Temperature slider
@@ -56,53 +58,33 @@ async function checkServerStatus() {
 async function fetchModels() {
     const isOnline = await checkServerStatus();
     if (!isOnline) {
-        const modelGrid = document.getElementById('modelGrid');
-        const editPersonaModel = document.getElementById('editPersonaModel');
-        const personaList = document.getElementById('personaList');
-        
-        if (modelGrid) modelGrid.innerHTML = '<div>Server offline</div>';
-        if (editPersonaModel) editPersonaModel.innerHTML = '<option value="">Server offline</option>';
-        if (personaList) {
-            personaList.innerHTML = '<option value="">Server offline</option>';
-        }
+        handleOfflineState();
         return;
     }
 
     try {
         const response = await fetch('http://localhost:11434/api/tags');
         const data = await response.json();
-        
-        // Update model grid in settings
-        const modelGrid = document.getElementById('modelGrid');
-        if (modelGrid) {
-            modelGrid.innerHTML = '';
-            data.models.forEach(model => {
-                const card = document.createElement('div');
-                card.className = 'model-card';
-                card.innerHTML = `
-                    <h3>${model.name}</h3>
-                    <div class="model-meta">
-                        <span class="tag">Size: ${formatSize(model.size)}</span>
-                        <span class="tag">Modified: ${formatDate(model.modified_at)}</span>
-                    </div>
-                    <div class="model-actions">
-                        <button class="btn btn-danger" onclick="deleteModel('${model.name}')">
-                            Delete
-                        </button>
-                    </div>
-                `;
-                modelGrid.appendChild(card);
+        const models = data.models;
+
+        // Populate modelList
+        const modelList = document.getElementById('modelList');
+        if (modelList) {
+            modelList.innerHTML = models.map(model => 
+                `<option value="${model.name}">${model.name}</option>`
+            ).join('');
+            modelList.addEventListener('change', function() {
+                handleModelChange(this.options[this.selectedIndex]);
             });
         }
 
-        // Update persona selector
+        // Populate personaList with optgroup
         const personaList = document.getElementById('personaList');
         if (personaList) {
-            const defaultPersonas = data.models.map(createDefaultPersonaFromModel);
             personaList.innerHTML = `
                 <optgroup label="Models">
-                    ${defaultPersonas.map(p => 
-                        `<option value="${p.name}" data-is-default="true">${p.name}</option>`
+                    ${models.map(model => 
+                        `<option value="${model.name}" data-is-default="true">${model.name}</option>`
                     ).join('')}
                 </optgroup>
                 <optgroup label="Personas">
@@ -111,28 +93,30 @@ async function fetchModels() {
                     ).join('')}
                 </optgroup>
             `;
-            
-            // After updating the list, trigger the persona change handler
-            handlePersonaChange(personaList.options[personaList.selectedIndex]);
+            personaList.addEventListener('change', function() {
+                handlePersonaChange(this.options[this.selectedIndex]);
+            });
         }
 
-        // Update model select in persona editor
-        const editPersonaModel = document.getElementById('editPersonaModel');
-        if (editPersonaModel) {
-            editPersonaModel.innerHTML = data.models
-                .map(model => `<option value="${model.name}">${model.name}</option>`)
-                .join('');
+        // Update model grid in settings modal
+        const modelGrid = document.getElementById('modelGrid');
+        if (modelGrid) {
+            modelGrid.innerHTML = models.map(model => `
+                <div class="model-card">
+                    <h3>${model.name}</h3>
+                    <div class="model-meta">
+                        <div>Size: ${formatSize(model.size)}</div>
+                        <div>Modified: ${formatDate(model.modified)}</div>
+                    </div>
+                </div>
+            `).join('');
         }
 
+        return models;
     } catch (error) {
         console.error('Error fetching models:', error);
-        const modelGrid = document.getElementById('modelGrid');
-        const editPersonaModel = document.getElementById('editPersonaModel');
-        const personaList = document.getElementById('personaList');
-        
-        if (modelGrid) modelGrid.innerHTML = '<div>Error loading models</div>';
-        if (editPersonaModel) editPersonaModel.innerHTML = '<option value="">Error loading models</option>';
-        if (personaList) personaList.innerHTML = '<option value="">Error loading models</option>';
+        handleOfflineState();
+        throw error;
     }
 }
 
@@ -293,7 +277,9 @@ async function generateResponse() {
 textarea.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
-        generateResponse();
+        if (this.value.trim()) {
+            generateResponse();
+        }
     }
 });
 
@@ -329,9 +315,14 @@ function closeSettingsModal() {
 
 // Close modal when clicking outside
 window.addEventListener('click', (event) => {
-    const modal = document.getElementById('settingsModal');
-    if (event.target === modal) {
+    const settingsModal = document.getElementById('settingsModal');
+    const personaModal = document.getElementById('personaModal');
+    
+    if (event.target === settingsModal) {
         closeSettingsModal();
+    }
+    if (event.target === personaModal) {
+        closePersonaModal();
     }
 });
 
@@ -567,9 +558,10 @@ function handleModelChange() {
 
 // Create default personas from models
 function createDefaultPersonaFromModel(model) {
+    const modelName = typeof model === 'string' ? model : model.name;
     return {
-        name: model.name,
-        model: model.name,
+        name: modelName,
+        model: modelName,
         temperature: 0.7,
         systemPrompt: '',
         isDefault: true
@@ -577,35 +569,28 @@ function createDefaultPersonaFromModel(model) {
 }
 
 function handlePersonaChange(selectedOption) {
+    if (!selectedOption) return;
+
     const isDefault = selectedOption.getAttribute('data-is-default') === 'true';
     const selectedName = selectedOption.value;
-    const imageUploadBtn = document.getElementById('imageUpload');
-    
-    let selectedPersona;
-    if (isDefault) {
-        selectedPersona = {
-            name: selectedName,
-            model: selectedName,
-            temperature: 0.7,
-            systemPrompt: ''
-        };
-    } else {
-        selectedPersona = personas.find(p => p.name === selectedName);
+
+    // Update temperature if it's a persona
+    if (!isDefault) {
+        const persona = personas.find(p => p.name === selectedName);
+        if (persona) {
+            const temperatureSlider = document.getElementById('temperature');
+            const temperatureValue = document.getElementById('temperatureValue');
+            if (temperatureSlider && temperatureValue) {
+                temperatureSlider.value = persona.temperature;
+                temperatureValue.textContent = persona.temperature;
+            }
+        }
     }
 
-    if (selectedPersona) {
-        // Update image upload button visibility based on model
-        imageUploadBtn.style.display = 
-            selectedPersona.model === 'llama3.2-vision:latest' ? 'block' : 'none';
-
-        // Update other controls...
-        document.getElementById('modelList').value = selectedPersona.model;
-        const temperatureSlider = document.getElementById('temperature');
-        const temperatureValue = document.getElementById('temperatureValue');
-        if (temperatureSlider && temperatureValue) {
-            temperatureSlider.value = selectedPersona.temperature;
-            temperatureValue.textContent = selectedPersona.temperature;
-        }
+    // Update image upload button visibility
+    const imageUploadBtn = document.getElementById('imageUpload');
+    if (imageUploadBtn) {
+        imageUploadBtn.style.display = selectedName === 'llama3.2-vision:latest' ? 'block' : 'none';
     }
 }
 
@@ -613,7 +598,7 @@ function handlePersonaChange(selectedOption) {
 function updateControlsRow() {
     const controlsRow = document.querySelector('.controls-row');
     const modelSelect = document.getElementById('modelList');
-    const models = Array.from(modelSelect.options).map(option => ({
+    const models = Array.from(modelSelect?.options || []).map(option => ({
         name: option.value,
         displayName: option.text
     })).filter(model => model.name !== 'loading');
@@ -625,76 +610,29 @@ function updateControlsRow() {
         ...personas.filter(p => !p.isDefault)  // Only include user-created personas
     ];
 
-    // Update the controls row HTML
-    controlsRow.innerHTML = `
-        <div class="model-select-container">
-            <select id="modelList" style="display: none;">
-                ${models.map(m => `<option value="${m.name}">${m.displayName}</option>`).join('')}
-            </select>
-        </div>
-        <div class="persona-select-container">
-            <div class="context-controls">
-                <button class="context-button" id="clearConversationButton" title="Clear Conversation">
-                    <span class="material-icons">clear</span>
-                </button>
-                <button class="context-button" id="fullContextButton" title="Use Full History">
-                    <span class="material-icons">select_all</span>
-                </button>
-                <button class="context-button" id="selectContextButton" title="Select Context">
-                    <span class="material-icons">checklist</span>
-                </button>
-            </div>
-            <select id="personaList">
-                <optgroup label="Models">
-                    ${defaultPersonas.map(p => 
-                        `<option value="${p.name}" data-is-default="true">${p.name}</option>`
-                    ).join('')}
-                </optgroup>
-                <optgroup label="Personas">
-                    ${personas.filter(p => !p.isDefault).map(p => 
-                        `<option value="${p.name}">${p.name}</option>`
-                    ).join('')}
-                </optgroup>
-            </select>
-            <button id="personaButton" class="icon-button" title="Manage Personas">
-                <span class="material-icons">person</span>
-            </button>
-        </div>
-    `;
+    // Update the persona select HTML
+    const personaList = document.getElementById('personaList');
+    if (personaList) {
+        personaList.innerHTML = `
+            <optgroup label="Models">
+                ${defaultPersonas.map(p => 
+                    `<option value="${p.name}" data-is-default="true">${p.name}</option>`
+                ).join('')}
+            </optgroup>
+            <optgroup label="Personas">
+                ${personas.filter(p => !p.isDefault).map(p => 
+                    `<option value="${p.name}">${p.name}</option>`
+                ).join('')}
+            </optgroup>
+        `;
 
-    // Add event listener for the persona button
-    document.getElementById('personaButton').addEventListener('click', openPersonaModal);
-
-    // Add event listener for persona selection
-    document.getElementById('personaList').addEventListener('change', function() {
-        handlePersonaChange(this.options[this.selectedIndex]);
-    });
-
-    // Add event listeners for context buttons
-    const fullContextButton = document.getElementById('fullContextButton');
-    fullContextButton.addEventListener('click', function() {
-        useFullContext = !useFullContext;
-        this.classList.toggle('active', useFullContext);
-        // When fullContext is enabled, clear selectedContextMessages
-        if (useFullContext) {
-            selectedContextMessages = [];
-            document.getElementById('selectContextButton').classList.remove('active');
-        }
-    });
-
-    const selectContextButton = document.getElementById('selectContextButton');
-    selectContextButton.addEventListener('click', function() {
-        openContextSelectionModal();
-        // Disable fullContext when selecting context
-        useFullContext = false;
-        fullContextButton.classList.remove('active');
-    });
-
-    // Add event listener for clear conversation button
-    document.getElementById('clearConversationButton').addEventListener('click', clearConversation);
+        // Add event listener for persona changes
+        personaList.addEventListener('change', function() {
+            handlePersonaChange(this.options[this.selectedIndex]);
+        });
+    }
 
     // Trigger initial check for current selection
-    const personaList = document.getElementById('personaList');
     if (personaList) {
         handlePersonaChange(personaList.options[personaList.selectedIndex]);
     }
@@ -885,19 +823,61 @@ function savePersonaEdit() {
 }
 
 // Initialize UI
-document.addEventListener('DOMContentLoaded', initializeUI);
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // Initialize UI elements
+        await initializeUI();
 
-// Initialize tabs and controls
-function initializeUI() {
-    initTabs();
-    updateControlsRow();
-    
+        // Fetch and populate models and personas
+        await fetchModels();
+
+        // Handle URL parameters after populating dropdowns
+        await initializeFromURL();
+
+        // Set up event listeners
+        const textarea = document.getElementById('prompt');
+        if (textarea) {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+                handlePromptInput();
+            });
+            textarea.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    if (this.value.trim()) {
+                        generateResponse();
+                    }
+                }
+            });
+        }
+
+        // Start periodic server status check
+        setInterval(checkServerStatus, 5000);
+
+    } catch (error) {
+        console.error('Failed to initialize UI:', error);
+        const statusText = document.getElementById('serverStatusText');
+        if (statusText) {
+            statusText.textContent = 'Failed to initialize. Please refresh the page.';
+        }
+    }
+});
+
+// Function to initialize UI elements
+async function initializeUI() {
     // Add event listeners for persona management
-    document.getElementById('personaButton').addEventListener('click', openPersonaModal);
-    
+    const personaButton = document.getElementById('personaButton');
+    if (personaButton) {
+        personaButton.addEventListener('click', openPersonaModal);
+    }
+
     // Add settings button click handler
-    document.getElementById('settingsButton').addEventListener('click', openSettingsModal);
-    
+    const settingsButton = document.getElementById('settingsButton');
+    if (settingsButton) {
+        settingsButton.addEventListener('click', openSettingsModal);
+    }
+
     // Add close button handlers
     document.querySelectorAll('.close-button').forEach(button => {
         button.addEventListener('click', e => {
@@ -908,40 +888,156 @@ function initializeUI() {
     // Set initial image upload button visibility
     const imageUploadBtn = document.getElementById('imageUpload');
     const personaList = document.getElementById('personaList');
-    if (personaList && personaList.value === 'llama3.2-vision:latest') {
-        imageUploadBtn.style.display = 'block';
-    } else {
-        imageUploadBtn.style.display = 'none';
+    if (imageUploadBtn && personaList) {
+        const selectedName = personaList.value;
+        imageUploadBtn.style.display = selectedName === 'llama3.2-vision:latest' ? 'block' : 'none';
+    }
+
+    // Add context button event listeners
+    const fullContextButton = document.getElementById('fullContextButton');
+    if (fullContextButton) {
+        fullContextButton.addEventListener('click', function() {
+            useFullContext = !useFullContext;
+            this.classList.toggle('active', useFullContext);
+            if (useFullContext) {
+                selectedContextMessages = [];
+                document.getElementById('selectContextButton').classList.remove('active');
+            }
+        });
+    }
+
+    const selectContextButton = document.getElementById('selectContextButton');
+    if (selectContextButton) {
+        selectContextButton.addEventListener('click', function() {
+            const isActive = this.classList.contains('active');
+            if (!isActive) {
+                openContextSelectionModal();
+                useFullContext = false;
+                fullContextButton.classList.remove('active');
+            } else {
+                // If already active, deactivate and clean up
+                document.querySelectorAll('.context-checkbox').forEach(el => el.remove());
+                document.querySelectorAll('.conversation-pair').forEach(el => {
+                    el.classList.remove('conversation-pair');
+                });
+                selectedContextMessages = [];
+            }
+            this.classList.toggle('active');
+        });
+    }
+
+    const clearConversationButton = document.getElementById('clearConversationButton');
+    if (clearConversationButton) {
+        clearConversationButton.addEventListener('click', clearConversation);
     }
 }
 
-// Initialize tabs
-function initTabs() {
-    const tabButtons = document.querySelectorAll('.tab-button');
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            // Remove active class from all tabs
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            // Add active class to clicked tab
-            button.classList.add('active');
-            document.getElementById(`${button.dataset.tab}-tab`).classList.add('active');
-        });
-    });
+// Function to initialize selections based on URL parameters
+async function initializeFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const modelFromURL = urlParams.get('model');
+    const personaFromURL = urlParams.get('persona');
+
+    const personaList = document.getElementById('personaList');
+    if (!personaList) return;
+
+    if (personaFromURL) {
+        // Find and select the persona option
+        const personaOption = Array.from(personaList.options).find(opt => 
+            opt.value === personaFromURL && !opt.getAttribute('data-is-default')
+        );
+        if (personaOption) {
+            personaOption.selected = true;
+            handlePersonaChange(personaOption);
+        }
+    } else if (modelFromURL) {
+        // Find and select the model option
+        const modelOption = Array.from(personaList.options).find(opt => 
+            opt.value === modelFromURL && opt.getAttribute('data-is-default') === 'true'
+        );
+        if (modelOption) {
+            modelOption.selected = true;
+            handlePersonaChange(modelOption);
+        }
+    }
 }
 
-// Add the clearConversation function
+// Handle changes in personaList
+function handlePersonaChange(selectedOption) {
+    if (!selectedOption) return;
+
+    const isDefault = selectedOption.getAttribute('data-is-default') === 'true';
+    const selectedName = selectedOption.value;
+
+    // Update temperature if it's a persona
+    if (!isDefault) {
+        const persona = personas.find(p => p.name === selectedName);
+        if (persona) {
+            const temperatureSlider = document.getElementById('temperature');
+            const temperatureValue = document.getElementById('temperatureValue');
+            if (temperatureSlider && temperatureValue) {
+                temperatureSlider.value = persona.temperature;
+                temperatureValue.textContent = persona.temperature;
+            }
+        }
+    }
+
+    // Update image upload button visibility
+    const imageUploadBtn = document.getElementById('imageUpload');
+    if (imageUploadBtn) {
+        imageUploadBtn.style.display = selectedName === 'llama3.2-vision:latest' ? 'block' : 'none';
+    }
+}
+
+// Handle changes in modelList
+function handleModelChange(selectedOption) {
+    if (!selectedOption) return;
+    const selectedModel = selectedOption.value;
+
+    // Optionally, sync model selection with personaList
+    const personaList = document.getElementById('personaList');
+    if (personaList) {
+        const modelOption = Array.from(personaList.options).find(opt => 
+            opt.value === selectedModel && opt.getAttribute('data-is-default') === 'true'
+        );
+        if (modelOption) {
+            modelOption.selected = true;
+            handlePersonaChange(modelOption);
+        }
+    }
+
+    // Additional logic for model selection can be added here
+    console.log(`Model selected: ${selectedModel}`);
+}
+
+// Helper functions
+function formatSize(sizeInBytes) {
+    return `${(sizeInBytes / (1024 ** 3)).toFixed(1)} GB`;
+}
+
+function formatDate(timestamp) {
+    return new Date(timestamp).toLocaleDateString();
+}
+
+// Existing functions like checkServerStatus, handleOfflineState, etc.
+// Ensure these functions are properly defined elsewhere in script.js
+
+// Remove any duplicate fetchModels or related functions to prevent conflicts
+
 function clearConversation() {
-    if (confirm('Are you sure you want to clear the conversation?')) {
-        const responseDiv = document.getElementById('response');
-        responseDiv.innerHTML = '';
+    if (confirm('Are you sure you want to clear the conversation history?')) {
         conversationHistory = [];
         selectedContextMessages = [];
         useFullContext = false;
-        
-        // Reset context buttons
+        document.getElementById('response').innerHTML = '';
         document.getElementById('fullContextButton').classList.remove('active');
         document.getElementById('selectContextButton').classList.remove('active');
     }
+}
+
+// Add this new function to handle prompt input changes
+function handlePromptInput() {
+    const promptInput = document.getElementById('prompt');
+    const generateButton = document.getElementById('generate');
+    generateButton.disabled = !promptInput.value.trim() || !serverOnline;
 }

@@ -1,144 +1,458 @@
-<!-- web/0-basic/index.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Persona Studio</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
+    <title>Persona Studio - Home</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="script.js"></script>
+    <style>
+        /* Additional styles for landing page */
+        .landing-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .hero-section {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .hero-section h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .hero-section p {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 15px 30px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            transition: background 0.3s;
+        }
+
+        .cta-button:hover {
+            background: #0056b3;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .feature-card {
+            padding: 20px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        .feature-card .material-icons {
+            font-size: 48px;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        [data-theme="dark"] {
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        [data-theme="dark"] .feature-card {
+            background: #2a2a2a;
+            border-color: #333;
+        }
+
+        [data-theme="dark"] .hero-section p {
+            color: #aaa;
+        }
+
+        /* Add styles for personas section */
+        .personas-section {
+            margin-top: 60px;
+            margin-bottom: 60px;
+        }
+
+        .personas-section h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .personas-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Add styles for single persona */
+        .personas-grid:only-child {
+            place-items: center;
+        }
+
+        /* Update persona card styles */
+        .persona-card {
+            padding: 24px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-height: 250px;
+            width: 300px;
+            box-sizing: border-box;
+        }
+
+        .persona-card .material-icons {
+            font-size: 36px;
+            color: #007bff;
+        }
+
+        .persona-meta {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .persona-system-prompt {
+            color: #666;
+            font-size: 0.9em;
+            margin: 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Dark mode styles for personas */
+        [data-theme="dark"] .persona-card {
+            background: #2a2a2a;
+            border-color: #333;
+        }
+
+        [data-theme="dark"] .persona-system-prompt {
+            color: #aaa;
+        }
+
+        /* Add styles for personas section */
+        .personas-header {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .persona-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            margin-top: auto;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 4px;
+        }
+
+        .icon-button {
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #f8f9fa;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: inherit;
+            text-decoration: none;
+            width: 30px;
+            height: 30px;
+        }
+
+        .icon-button:hover {
+            background: #e9ecef;
+        }
+
+        [data-theme="dark"] .icon-button {
+            background: #2a2a2a;
+            border-color: #404040;
+        }
+
+        [data-theme="dark"] .icon-button:hover {
+            background: #333;
+        }
+
+        /* Update existing persona card styles */
+        .persona-card {
+            padding: 24px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-height: 250px;
+            width: 300px;
+            box-sizing: border-box;
+        }
+
+        .cta-button {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .cta-button .material-icons {
+            font-size: 20px;
+            vertical-align: middle;
+            margin-right: 4px;
+        }
+
+        /* Add styles for models section */
+        .models-section {
+            margin-top: 60px;
+        }
+
+        .models-section h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .models-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .model-card {
+            padding: 20px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .model-card h3 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .model-meta {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        [data-theme="dark"] .model-card {
+            background: #2a2a2a;
+            border-color: #333;
+        }
+
+        [data-theme="dark"] .model-meta {
+            color: #aaa;
+        }
+
+        /* Update model card styles to accommodate buttons */
+        .model-card {
+            padding: 20px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .model-actions {
+            display: flex;
+            justify-content: flex-start;
+            gap: 8px;
+            margin-top: auto;  /* Push actions to bottom */
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <div class="status-bar">
-            <h1>Persona Studio</h1>
-            <div class="server-status">
-                <button id="settingsButton" class="icon-button" title="Manage Models">
-                    <span class="material-icons">settings</span>
-                </button>
-                <button id="darkModeToggle" class="theme-toggle">
-                    <span class="material-icons">brightness_4</span>
-                </button>
-                <span class="status-indicator" id="serverStatus"></span>
-                <span id="serverStatusText">Checking server...</span>
-            </div>
-        </div>
-
-        <div id="response" class="response-area"></div>
-        
-        <div class="input-section">
-            <div class="controls-row">
-                <div class="model-select-container">
-                    <select id="modelList">
-                        <option value="loading">Loading models...</option>
-                    </select>
-                </div>
-                <div class="temperature-container">
-                    <label for="temperature">Temperature:</label>
-                    <div class="slider-container">
-                        <input type="range" id="temperature" min="0" max="2" step="0.1" value="0.7">
-                        <span class="temperature-value" id="temperatureValue">0.7</span>
-                    </div>
-                </div>
-                <div class="persona-select-container">
-                    <select id="personaList">
-                        <!-- Will be populated dynamically -->
-                    </select>
-                </div>
-            </div>
-
-            <div class="input-row">
-                <div class="prompt-container">
-                    <textarea id="prompt" placeholder="Enter your prompt..."></textarea>
-                    <button id="imageUpload" class="image-upload-button" title="Upload Image">
-                        <span class="material-icons">image</span>
-                    </button>
-                    <div id="imagePreview" class="image-preview"></div>
-                </div>
-                <button id="generate" onclick="generateResponse()">
-                    <span class="material-icons">send</span>
-                </button>
-            </div>
-            <div id="status" class="status"></div>
+    <div class="status-bar">
+        <h1>Persona Studio</h1>
+        <div class="server-status">
+            <button id="settingsButton" class="icon-button" title="Manage Models">
+                <span class="material-icons">settings</span>
+            </button>
+            <button id="darkModeToggle" class="theme-toggle">
+                <span class="material-icons">brightness_4</span>
+            </button>
+            <span class="status-indicator" id="serverStatus"></span>
+            <span id="serverStatusText">Checking server...</span>
         </div>
     </div>
 
-    <div id="settingsModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Model Management</h2>
-                <button class="close-button">&times;</button>
+    <div class="landing-container">
+        <div class="hero-section">
+            <h1>Welcome to Persona Studio</h1>
+            <p>Create, manage, and chat with AI personas powered by Ollama models</p>
+            <a href="chat.html" class="cta-button">
+                <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">chat</span>
+                Start Chatting
+            </a>
+        </div>
+
+        <div class="personas-section">
+            <h2>Your Personas</h2>
+            <div class="personas-header">
+                <a href="builder.html" class="cta-button">
+                    <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">add</span>
+                    Add Persona
+                </a>
             </div>
-            <div class="modal-body">
-                <div class="tab-content active" id="models-tab">
-                    <div class="pull-section">
-                        <h3>Pull New Model</h3>
-                        <div class="pull-controls">
-                            <input type="text" id="modelName" placeholder="Enter model name (e.g., llama2:latest)">
-                            <button id="pullButton" class="btn btn-primary" onclick="pullModel()">Pull Model</button>
-                            <button id="cancelPull" class="btn btn-danger" onclick="cancelModelPull()" style="display: none;">Cancel</button>
-                            <div id="pullProgress" class="progress-bar" style="display: none;">
-                                <div id="progressFill" class="progress-fill"></div>
-                            </div>
-                            <div id="pullStatus" class="status-text"></div>
+            <div class="personas-grid" id="personasGrid">
+                <!-- Personas will be populated here -->
+            </div>
+        </div>
+
+        <div class="models-section">
+            <h2>Installed Models</h2>
+            <div class="models-grid" id="modelsGrid">
+                <!-- Models will be populated here -->
+            </div>
+        </div>
+
+        <h2>Features</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <span class="material-icons">person</span>
+                <h3>Custom Personas</h3>
+                <p>Create and customize AI personas with different personalities and capabilities</p>
+            </div>
+            <div class="feature-card">
+                <span class="material-icons">model_training</span>
+                <h3>Multiple Models</h3>
+                <p>Support for various Ollama models including Llama, Mistral, and more</p>
+            </div>
+            <div class="feature-card">
+                <span class="material-icons">history</span>
+                <h3>Context Management</h3>
+                <p>Smart conversation history and context selection for better responses</p>
+            </div>
+            <div class="feature-card">
+                <span class="material-icons">image</span>
+                <h3>Image Support</h3>
+                <p>Upload and analyze images with compatible vision models</p>
+            </div>
+        </div>
+
+
+    </div>
+
+    <script>
+        // Theme initialization
+        function initTheme() {
+            const theme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Theme event listeners
+        document.getElementById('darkModeToggle').addEventListener('click', toggleTheme);
+        initTheme();
+
+        // Add persona loading and display functionality
+        function loadAndDisplayPersonas() {
+            const personas = JSON.parse(localStorage.getItem('personas')) || [{
+                name: 'Default Assistant',
+                model: 'mistral-nemo:latest',
+                temperature: 0.7,
+                systemPrompt: ''
+            }];
+
+            const personasGrid = document.getElementById('personasGrid');
+            personasGrid.innerHTML = personas.map(persona => `
+                <div class="persona-card">
+                    <span class="material-icons">smart_toy</span>
+                    <h3>${persona.name}</h3>
+                    <div class="persona-meta">
+                        <span class="tag">Model: ${persona.model}</span>
+                        <span class="tag">Temp: ${persona.temperature}</span>
+                    </div>
+                    <p class="persona-system-prompt">${persona.systemPrompt || 'No system prompt'}</p>
+                    <div class="persona-actions">
+                        <a href="chat.html?persona=${encodeURIComponent(persona.name)}" class="cta-button">
+                            <span class="material-icons" style="font-size: 20px;">chat</span>
+                            Chat
+                        </a>
+                        <div class="action-buttons">
+                            <a href="builder.html?edit=${encodeURIComponent(persona.name)}" class="icon-button" title="Edit">
+                                <span class="material-icons" style="font-size: 18px;">edit</span>
+                            </a>
                         </div>
                     </div>
+                </div>
+            `).join('');
+        }
 
-                    <h3>Installed Models</h3>
-                    <div class="model-grid" id="modelGrid">
-                        <!-- Models will be populated here -->
+        // Add model loading functionality
+        async function loadAndDisplayModels() {
+            const modelsGrid = document.getElementById('modelsGrid');
+            
+            try {
+                const response = await fetch('http://localhost:11434/api/tags');
+                const data = await response.json();
+                
+                modelsGrid.innerHTML = data.models.map(model => `
+                    <div class="model-card">
+                        <h3>
+                            <span class="material-icons">model_training</span>
+                            ${model.name}
+                        </h3>
+                        <div class="model-meta">
+                            <div>Size: ${(model.size / (1024 * 1024 * 1024)).toFixed(1)} GB</div>
+                            <div>Modified: ${new Date(model.modified).toLocaleDateString()}</div>
+                        </div>
+                        <div class="model-actions">
+                            <a href="chat.html?model=${encodeURIComponent(model.name)}" class="cta-button">
+                                <span class="material-icons" style="font-size: 20px;">chat</span>
+                                Chat
+                            </a>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                `).join('');
+            } catch (error) {
+                modelsGrid.innerHTML = '<p>Unable to fetch installed models. Please ensure Ollama is running.</p>';
+                console.error('Error fetching models:', error);
+            }
+        }
 
-    <div id="editPersonaModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Edit Persona</h2>
-                <button class="close-button" onclick="document.getElementById('editPersonaModal').style.display='none'">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="editPersonaName">Name:</label>
-                    <input type="text" id="editPersonaName" placeholder="Enter persona name">
-                </div>
-                <div class="form-group">
-                    <label for="editPersonaModel">Model:</label>
-                    <select id="editPersonaModel"></select>
-                </div>
-                <div class="form-group">
-                    <label for="editPersonaTemperature">Temperature:</label>
-                    <input type="range" id="editPersonaTemperature" min="0" max="2" step="0.1" value="0.7">
-                    <span id="editPersonaTemperatureValue">0.7</span>
-                </div>
-                <div class="form-group">
-                    <label for="editPersonaSystemPrompt">System Prompt:</label>
-                    <textarea id="editPersonaSystemPrompt" rows="4" placeholder="Enter system prompt"></textarea>
-                </div>
-                <button class="btn btn-primary" onclick="savePersonaEdit()">Save Persona</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="personaModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Manage Personas</h2>
-                <button class="close-button" onclick="closePersonaModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <button class="btn btn-primary" onclick="editPersona()">Add New Persona</button>
-                <div class="persona-grid" id="personaGrid">
-                    <!-- Personas will be populated here -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
+        // Initialize both personas and models on page load
+        loadAndDisplayPersonas();
+        loadAndDisplayModels();
+    </script>
 </body>
-</html> 
+</html>
