@@ -1,14 +1,17 @@
-# Ollama GUI
-ollama-gui is a simple gui for ollama, local llm.  
-No need for Docker, nodejs - just ollama, terminal and web browser.  
+# Persona Studio
+Persona Studio is an open-source take on Meta AI Studio.  
+Difference? You have the ownership on your data, personas and even modify the studio itself.
 
 ## Features
-1) Basic prompting - model selection, temperature
-2) Model manager - pull new model, view and delete models
-3) Image input for [llama3.2-vision:latest](https://ollama.com/library/llama3.2-vision)
-4) Server status
-5) Dark mode
-6) User defined personas
+1) Basic chat features from [coreOllama](https://github.com/chanulee/coreOllama)
+  - Model/persona selection, Model manager (pull, view and delete models), Image input for [llama3.2-vision:latest](https://ollama.com/library/llama3.2-vision), Server status, Dark mode, context management
+2) Personas, product structure & etc still being developed
+
+## TBD - To Be Developed
+- Persona builder
+- Textfield on landing instead of start chatting button
+- Export and import persona
+- Chat history
 
 ---
 
@@ -17,30 +20,8 @@ No need for Docker, nodejs - just ollama, terminal and web browser.
 2. Quit the app (check on your status bar). 
 3. Open terminal and enter `ollama serve`. Keep that terminal window open.
 4. Check http://localhost:11434/, it should say "Ollama is running".
-5. Download the repo and open `1-chat/index.html`
+5. Download the repo and open `index.html`
 
-## Ollama terminal commands
-Start server
-```bash
-ollama serve
-```
-List models
-```bash
-ollama list
-```
-Remove model
-```bash
-ollama rm llama3
-```
-Run model
-```bash
-ollama run mistral-nemo
-```
-While ollama server running, this is API command. Get rid of the stream: false if you want to see the output word-by-word. [Ref](https://dev.to/jayantaadhikary/using-the-ollama-api-to-run-llms-and-generate-responses-locally-18b7)
-```bash
-http://localhost:11434/api/generate -d '{ "model": "mistral-nemo", "prompt": "What is water made of?", "stream": false }'
-```
----
 ## For future reference
 - Making a custom model using huggingface model https://www.youtube.com/watch?v=bXf2Cxf3Wk0
 - Customisation of existing model (llama) 
