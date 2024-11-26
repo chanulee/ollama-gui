@@ -1,5 +1,5 @@
 # Persona Studio
-Persona Studio is an open-source take on Meta AI Studio.  
+Persona Studio is an open-source take on [Meta AI Studio](https://ai.meta.com/ai-studio/).  
 Difference? You have the ownership on your data, personas and even modify the studio itself.
 
 ## Features
